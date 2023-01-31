@@ -178,8 +178,7 @@ window_esp.toggle("door esp",false,function(val)
     flags.espdoors = val
     
     if val then
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local door = room:WaitForChild("Door"):WaitForChild("Door")
             
             task.wait(0.1)
@@ -193,7 +192,16 @@ window_esp.toggle("door esp",false,function(val)
             door.AncestryChanged:Connect(function()
                 h.delete()
             end)
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room)
+        end
         
         repeat task.wait() until not flags.espdoors
         addconnect:Disconnect()
@@ -230,8 +238,7 @@ window_esp.toggle("key/lever esp",false,function(val)
             end
         end
         
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local assets = room:WaitForChild("Assets")
             
             assets.DescendantAdded:Connect(function(v)
@@ -240,8 +247,17 @@ window_esp.toggle("key/lever esp",false,function(val)
                 
             for i,v in pairs(assets:GetDescendants()) do
                 check(v)
-            end
+            end 
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room) 
+        end
         
         repeat task.wait() until not flags.espkeys
         addconnect:Disconnect()
@@ -265,8 +281,7 @@ window_esp.toggle("item esp",false,function(val)
             end
         end
         
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local assets = room:WaitForChild("Assets")
             
             if assets then  
@@ -283,8 +298,17 @@ window_esp.toggle("item esp",false,function(val)
                     repeat task.wait() until not flags.espitems
                     subaddcon:Disconnect()  
                 end) 
-            end
+            end 
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room) 
+        end
         
         repeat task.wait() until not flags.espitems
         addconnect:Disconnect()
@@ -314,8 +338,7 @@ window_esp.toggle("book/breaker esp",false,function(val)
             end
         end
         
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local assets = room:WaitForChild("Assets")
             
             if room.Name == "50" or room.Name == "100" then
@@ -327,9 +350,19 @@ window_esp.toggle("book/breaker esp",false,function(val)
                     check(v)
                 end
             end
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
         
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room) 
+        end
+        
         repeat task.wait() until not flags.espbooks
+        addconnect:Disconnect()
         
         for i,v in pairs(esptable.books) do
             v.delete()
@@ -354,7 +387,7 @@ window_esp.toggle("entity esp",false,function(val)
             end
         end)
         
-        local roomconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             if room.Name == "50" or room.Name == "100" then
                 local figuresetup = room:WaitForChild("FigureSetup")
             
@@ -384,8 +417,17 @@ window_esp.toggle("entity esp",false,function(val)
                 for i,v in pairs(assets:GetDescendants()) do
                     check(v)
                 end
-            end
+            end 
+        end
+        
+        local roomconnect
+        roomconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room) 
+        end
         
         repeat task.wait() until not flags.esprush
         addconnect:Disconnect()
@@ -414,8 +456,7 @@ window_esp.toggle("locker esp",false,function(val)
             end
         end
         
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local assets = room:WaitForChild("Assets")
             
             if assets then
@@ -432,8 +473,17 @@ window_esp.toggle("locker esp",false,function(val)
                     repeat task.wait() until not flags.esplocker
                     subaddcon:Disconnect()  
                 end) 
-            end
+            end 
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room) 
+        end
         
         repeat task.wait() until not flags.esplocker
         addconnect:Disconnect()
@@ -462,8 +512,7 @@ window_esp.toggle("chest esp",false,function(val)
             end
         end
         
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local subaddcon
             subaddcon = room.DescendantAdded:Connect(function(v)
                 check(v) 
@@ -476,8 +525,17 @@ window_esp.toggle("chest esp",false,function(val)
             task.spawn(function()
                 repeat task.wait() until not flags.espchest
                 subaddcon:Disconnect()  
-            end) 
+            end)  
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room)
+        end
         
         repeat task.wait() until not flags.espchest
         addconnect:Disconnect()
@@ -552,8 +610,7 @@ window_esp.toggle("goldpile esp",false,function(val)
             end
         end
         
-        local addconnect
-        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+        local function setup(room)
             local assets = room:WaitForChild("Assets")
             
             local subaddcon
@@ -568,8 +625,17 @@ window_esp.toggle("goldpile esp",false,function(val)
             task.spawn(function()
                 repeat task.wait() until not flags.espchest
                 subaddcon:Disconnect()  
-            end) 
+            end)  
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
         end)
+        
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            setup(room)
+        end
         
         repeat task.wait() until not flags.espgold
         addconnect:Disconnect()
@@ -827,7 +893,3 @@ window_misc.button("close gui",function()
     task.wait()
     library.delete()
 end)
-
--- gui v2 stuff
-
--- game:GetService("Workspace").CurrentRooms["60"].RoomsDoor_Entrance.Door.EnterPrompt
