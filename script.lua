@@ -380,7 +380,7 @@ window_esp.toggle("book/breaker esp",false,function(val)
     end
 end)
 
-local entitynames = {"RushMoving","AmbushMoving","Snare","A60","A120"}
+local entitynames = {"RushMoving","AmbushMoving","Snare","A60","A120","Eyes"}
 
 window_player.label("credits: zoophiliaphobic#6287")
 window_esp.toggle("entity esp",false,function(val)
@@ -902,6 +902,19 @@ window_misc.toggle("loot aura",false,function(val)
                             end)
                         end
                     elseif v.Name:sub(1,8) == "ChestBox" then
+                        local prompt = v:WaitForChild("ActivateEventPrompt")
+                        local interactions = prompt:GetAttribute("Interactions")
+                        
+                        if not interactions then
+                            task.spawn(function()
+                                repeat task.wait(0.1)
+                                    if plr:DistanceFromCharacter(v.PrimaryPart.Position) <= 12 then
+                                        fireproximityprompt(prompt)
+                                    end
+                                until prompt:GetAttribute("Interactions") or not flags.draweraura
+                            end)
+                        end
+                    elseif v.Name == "RolltopContainer" then
                         local prompt = v:WaitForChild("ActivateEventPrompt")
                         local interactions = prompt:GetAttribute("Interactions")
                         
