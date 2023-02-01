@@ -976,7 +976,7 @@ window_misc.toggle("loot aura",false,function(val)
     end
 end)
 
-window_misc.label("bypass anticheat makes it so you cant pick up keys so only do this in multiplayer or in the rooms area",32)
+window_misc.label("bypass anticheat makes it so you CANT pick up ANYTHING so only do this in multiplayer or in the rooms area",36)
 
 window_misc.button("bypass anticheat",function()
     local hum = char:FindFirstChildOfClass("Humanoid")
