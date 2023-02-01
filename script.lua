@@ -971,10 +971,19 @@ if game.ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Floor").Value =
         flags.noa90 = val
         
         if val  then
-            if val then
+            local jumpscare = plr.PlayerGui:WaitForChild("MainUI"):WaitForChild("Jumpscare"):FindFirstChild("Jumpscare_A90")
+            local face = jumpscare:WaitForChild("Face")
+           
+            if jumpscare then
+                Jumpscare.Visible = false
+            
                 a90remote.Parent = nil
-                repeat task.wait() until not flags.noa90
-                a90remote.Parent = entityinfo
+                repeat task.wait()
+                    if face.Visible then
+                        game.SoundService.Main.Volume = 1 
+                    end
+                until not flags.noa90
+                a90remote.Parent = entityinfo 
             end
         end
     end)
@@ -986,3 +995,4 @@ window_misc.button("close gui",function()
     task.wait()
     library.delete()
 end)
+
