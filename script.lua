@@ -986,4 +986,3 @@ window_misc.button("close gui",function()
     task.wait()
     library.delete()
 end)
-
