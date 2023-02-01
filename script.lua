@@ -352,29 +352,38 @@ window_esp.toggle("book/breaker esp",false,function(val)
     
     if val then
         local function check(v)
-            if v:IsA("Model") and (v.Name == "LiveHintBook" or v.Name == "LiveBreakerPolePickup") then
+            if v:IsA("Model") then
                 task.wait(0.1)
                 
-                local h = esp(v,Color3.fromRGB(160,190,255),v.PrimaryPart,"Book")
-                table.insert(esptable.books,h)
-                
-                v.AncestryChanged:Connect(function()
-                    if not v:IsDescendantOf(assets) then
-                        h.delete() 
-                    end
-                end)
+                if v.Name == "LiveHintBook" then
+                    local h = esp(v,Color3.fromRGB(160,190,255),v.PrimaryPart,"Book")
+                    table.insert(esptable.books,h)
+                    
+                    v.AncestryChanged:Connect(function()
+                        if not v:IsDescendantOf(room) then
+                            h.delete() 
+                        end
+                    end) 
+                elseif v.Name == "LiveBreakerPolePickup" then
+                    local h = esp(v,Color3.fromRGB(160,190,255),v.PrimaryPart,"Breaker")
+                    table.insert(esptable.books,h)
+                    
+                    v.AncestryChanged:Connect(function()
+                        if not v:IsDescendantOf(room) then
+                            h.delete() 
+                        end
+                    end)
+                end
             end
         end
         
         local function setup(room)
-            local assets = room:WaitForChild("Assets")
-            
             if room.Name == "50" or room.Name == "100" then
-                assets.DescendantAdded:Connect(function(v)
+                room.DescendantAdded:Connect(function(v)
                     check(v) 
                 end)
                 
-                for i,v in pairs(assets:GetDescendants()) do
+                for i,v in pairs(room:GetDescendants()) do
                     check(v)
                 end
             end
@@ -386,9 +395,7 @@ window_esp.toggle("book/breaker esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            if room:FindFirstChild("Assets") then
-                setup(room) 
-            end
+            setup(room) 
         end
         
         repeat task.wait() until not flags.espbooks
