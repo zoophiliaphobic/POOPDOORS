@@ -125,6 +125,7 @@ local flags = {
     noscreech = false,
     getcode = false,
     roomsnolock = false,
+    draweraura = false,
 }
 
 local DELFLAGS = {table.unpack(flags)}
@@ -200,7 +201,9 @@ window_esp.toggle("door esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            setup(room)
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
         end
         
         repeat task.wait() until not flags.espdoors
@@ -256,7 +259,9 @@ window_esp.toggle("key/lever esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            setup(room) 
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
         end
         
         repeat task.wait() until not flags.espkeys
@@ -276,7 +281,8 @@ window_esp.toggle("item esp",false,function(val)
             if v:IsA("Model") and (v:GetAttribute("Pickup") or v:GetAttribute("PropType")) then
                 task.wait(0.1)
                 
-                local h = esp(v:WaitForChild("Handle"),Color3.fromRGB(160,190,255),v.Handle,v.Name)
+                local part = (v:FindFirstChild("Handle") or v:FindFirstChild("Prop"))
+                local h = esp(part,Color3.fromRGB(160,190,255),part,v.Name)
                 table.insert(esptable.items,h)
             end
         end
@@ -307,7 +313,9 @@ window_esp.toggle("item esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            setup(room) 
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
         end
         
         repeat task.wait() until not flags.espitems
@@ -358,7 +366,9 @@ window_esp.toggle("book/breaker esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            setup(room) 
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
         end
         
         repeat task.wait() until not flags.espbooks
@@ -534,7 +544,9 @@ window_esp.toggle("chest esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            setup(room)
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
         end
         
         repeat task.wait() until not flags.espchest
@@ -551,6 +563,15 @@ window_esp.toggle("player esp",false,function(val)
     
     if val then
         local function personesp(v)
+            v.CharacterAdded:Connect(function(vc)
+                local vh = vc:WaitForChild("Humanoid")
+                local torso = vc:WaitForChild("UpperTorso")
+                task.wait(0.1)
+                
+                local h = esp(vc,Color3.fromRGB(255,255,255),torso,v.DisplayName)
+                table.insert(esptable.people,h) 
+            end)
+            
             if v.Character then
                 local vc = v.Character
                 local vh = vc:WaitForChild("Humanoid")
@@ -560,15 +581,6 @@ window_esp.toggle("player esp",false,function(val)
                 local h = esp(vc,Color3.fromRGB(255,255,255),torso,v.DisplayName)
                 table.insert(esptable.people,h) 
             end
-            
-            v.CharacterAdded:Connect(function(vc)
-                local vh = vc:WaitForChild("Humanoid")
-                local torso = vc:WaitForChild("UpperTorso")
-                task.wait(0.1)
-                
-                local h = esp(vc,Color3.fromRGB(255,255,255),torso,v.DisplayName)
-                table.insert(esptable.people,h) 
-            end)
         end
         
         local addconnect
@@ -604,7 +616,7 @@ window_esp.toggle("goldpile esp",false,function(val)
                 
                 if goldvalue and goldvalue >= flags.goldespvalue then
                     local hitbox = v:WaitForChild("Hitbox")
-                    local h = esp(hitbox:GetChildren(),Color3.fromRGB(255,255,0),hitbox,"GoldPile")
+                    local h = esp(hitbox:GetChildren(),Color3.fromRGB(255,255,0),hitbox,"GoldPile [".. tostring(goldvalue).."]")
                     table.insert(esptable.gold,h)
                 end
             end
@@ -634,7 +646,9 @@ window_esp.toggle("goldpile esp",false,function(val)
         end)
         
         for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
-            setup(room)
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
         end
         
         repeat task.wait() until not flags.espgold
@@ -736,25 +750,16 @@ window_misc.toggle("delete puzzle door",false,function(val)
     end
 end)
 
-window_misc.toggle("disable screech",false,function(val)
+local entityinfo = game.ReplicatedStorage:WaitForChild("EntityInfo")
+local screechremote = entityinfo:WaitForChild("Screech")
+
+window_misc.toggle("harmless screech",false,function(val)
     flags.noscreech = val
     
     if val then
-        local attacksound = plr:WaitForChild("PlayerGui").MainUI.Initiator.Main_Game.RemoteListener.Modules.Screech.Attack
-        
-        local addconnect
-        addconnect = workspace.CurrentCamera.ChildAdded:Connect(function(v)
-            if v.Name == "Screech" then
-                repeat task.wait()
-                    game.ReplicatedStorage:WaitForChild("EntityInfo"):WaitForChild("Screech"):FireServer(true)
-                until not v:IsDescendantOf(workspace.CurrentCamera)
-            end
-        end)
-        
-        attacksound.Volume = 0
+        screechremote.Parent = nil
         repeat task.wait() until not flags.noscreech
-        addconnect:Disconnect()
-        attacksound.Volume = 1.1
+        screechremote.Parent = entityinfo
     end
 end)
 
@@ -841,7 +846,7 @@ window_misc.toggle("A-000 door no locks",false,function(val)
             
             if door then
                 local prompt = door:WaitForChild("Door"):WaitForChild("EnterPrompt")
-                prompt.Enabled = false
+                prompt.Enabled = true
             end 
         end
         
@@ -859,29 +864,104 @@ window_misc.toggle("A-000 door no locks",false,function(val)
     end
 end)
 
+window_misc.toggle("loot aura",false,function(val)
+    flags.draweraura = val
+    
+    if val then
+        local function setup(room)
+            local function check(v)
+                if v:IsA("Model") then
+                    if v.Name == "DrawerContainer" then
+                        local knob = v:WaitForChild("Knobs")
+                        
+                        if knob then
+                            local prompt = knob:WaitForChild("ActivateEventPrompt")
+                            local interactions = prompt:GetAttribute("Interactions")
+                            
+                            if not interactions then
+                                task.spawn(function()
+                                    repeat task.wait(0.1)
+                                        if plr:DistanceFromCharacter(knob.Position) <= 12 then
+                                            fireproximityprompt(prompt)
+                                        end
+                                    until prompt:GetAttribute("Interactions") or not flags.draweraura
+                                end)
+                            end
+                        end
+                    elseif v.Name == "GoldPile" then
+                        local prompt = v:WaitForChild("LootPrompt")
+                        local interactions = prompt:GetAttribute("Interactions")
+                            
+                        if not interactions then
+                            task.spawn(function()
+                                repeat task.wait(0.1)
+                                    if plr:DistanceFromCharacter(v.PrimaryPart.Position) <= 12 then
+                                        fireproximityprompt(prompt) 
+                                    end
+                                until prompt:GetAttribute("Interactions") or not flags.draweraura
+                            end)
+                        end
+                    elseif v.Name:sub(1,8) == "ChestBox" then
+                        local prompt = v:WaitForChild("ActivateEventPrompt")
+                        local interactions = prompt:GetAttribute("Interactions")
+                        
+                        if not interactions then
+                            task.spawn(function()
+                                repeat task.wait(0.1)
+                                    if plr:DistanceFromCharacter(v.PrimaryPart.Position) <= 12 then
+                                        fireproximityprompt(prompt)
+                                    end
+                                until prompt:GetAttribute("Interactions") or not flags.draweraura
+                            end)
+                        end
+                    end 
+                end
+            end
+    
+            local subaddcon
+            subaddcon = room.DescendantAdded:Connect(function(v)
+                check(v) 
+            end)
+            
+            for i,v in pairs(room:GetDescendants()) do
+                check(v)
+            end
+            
+            task.spawn(function()
+                repeat task.wait() until not flags.draweraura
+                subaddcon:Disconnect() 
+            end)
+        end
+        
+        local addconnect
+        addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+            setup(room)
+        end)
+        
+        for i,room in pairs(workspace.CurrentRooms:GetChildren()) do
+            if room:FindFirstChild("Assets") then
+                setup(room) 
+            end
+        end
+        
+        repeat task.wait() until not flags.draweraura
+        addconnect:Disconnect()
+    end
+end)
+
 if game.ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Floor").Value == "Rooms" then
     local window_rooms = library.window("the rooms")
     
-    window_rooms.toggle("disable A90",false,function(val)
+    local a90remote = game.ReplicatedStorage:WaitForChild("EntityInfo"):WaitForChild("A90")
+    
+    window_rooms.toggle("harmless A90",false,function(val)
         flags.noa90 = val
         
-        local jsframe = plr.PlayerGui:WaitForChild("MainUI"):WaitForChild("Jumpscare"):FindFirstChild("Jumpscare_A90")
-        if val and jsframe then
-            local face = jsframe:FindFirstChild("Face")
-                
-            if face then
-                local faceconnect
-                faceconnect = face.Changed:Connect(function()
-                    if face.Visible then
-                        repeat task.wait()
-                            game.ReplicatedStorage:WaitForChild("EntityInfo"):WaitForChild("A90"):FireServer(false)
-                        until not face.Visible
-                    end
-                end)
-                
-                repeat task.wait() jsframe.Visible = false until not flags.noa90
-                faceconnect:Disconnect()
-                jsframe.Visible = true
+        if val  then
+            if val then
+                a90remote.Parent = nil
+                repeat task.wait() until not flags.noa90
+                a90remote.Parent = entityinfo
             end
         end
     end)
@@ -893,3 +973,4 @@ window_misc.button("close gui",function()
     task.wait()
     library.delete()
 end)
+
