@@ -1,7 +1,15 @@
 local library = loadstring(game:HttpGet('https://pastebin.com/raw/vPWzQEC8'))()
 local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
+local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid")
+
+if not fireproximityprompt then
+    local msg = Instance.new("Message",workspace)
+    msg.Text = "you have fireproximityprompt function bro get better executor"
+    task.wait(6)
+    msg:Destroy()
+    error("no prox") 
+end
 
 function esp(what,color,core,name)
     local parts
@@ -102,6 +110,16 @@ function esp(what,color,core,name)
     return ret 
 end
 
+local entityinfo = game.ReplicatedStorage:WaitForChild("EntityInfo")
+function message(text)
+    local msg = Instance.new("Message",workspace)
+    msg.Text = tostring(text)
+    task.wait(5)
+    msg:Destroy()
+    
+    --firesignal(entityinfo.Caption.OnClientEvent,tostring(text)) 
+end
+
 local flags = {
     speed = 0,
     espdoors = false,
@@ -126,6 +144,7 @@ local flags = {
     getcode = false,
     roomsnolock = false,
     draweraura = false,
+    autorooms = false,
 }
 
 local DELFLAGS = {table.unpack(flags)}
@@ -137,15 +156,16 @@ local window_misc = library.window("misc")
 
 window_player.toggle("client glow",false,function(val)
     flags.light = val
-    
-    local l = Instance.new("PointLight")
-    l.Brightness = 1.5
-    l.Range = 1000
-    l.Shadows = false
-    l.Parent = char.PrimaryPart
-    
-    repeat task.wait() until not flags.light
-    l:Destroy()
+   
+    if val then
+        local l = Instance.new("PointLight")
+        l.Range = 10000
+        l.Brightness = 2
+        l.Parent = char.PrimaryPart
+       
+        repeat task.wait() until not flags.light
+        l:Destroy() 
+    end
 end)
 
 window_player.toggle("instant use",false,function(val)
@@ -160,15 +180,15 @@ window_player.toggle("instant use",false,function(val)
     holdconnect:Disconnect()
 end)
 
-window_player.slider("walkspeed",16,25,1,16,function(val)
-    hum:SetAttribute("SpeedBoost",val-16) 
-    flags.speed = val-16
+local walkspeedslider = window_player.slider("walkspeed",16,25,1,16,function(val)
+    hum.WalkSpeed = val
+    flags.speed = val
 end)
 
 task.spawn(function()
     while true do
-        if hum:GetAttribute("SpeedBoost") < flags.speed then
-            hum:SetAttribute("SpeedBoost",flags.speed)  
+        if hum.WalkSpeed < flags.speed then
+            hum.WalkSpeed = flags.speed
         end
         
         task.wait()
@@ -380,7 +400,7 @@ window_esp.toggle("book/breaker esp",false,function(val)
     end
 end)
 
-local entitynames = {"RushMoving","AmbushMoving","Snare","A60","A120","Eyes"}
+local entitynames = {"RushMoving","AmbushMoving","Snare","A60","A120"}
 
 window_player.label("credits: zoophiliaphobic#6287")
 window_esp.toggle("entity esp",false,function(val)
@@ -674,10 +694,7 @@ window_misc.toggle("notify entities",false,function(val)
                 repeat task.wait() until plr:DistanceFromCharacter(v:GetPivot().Position) < 1000 or not v:IsDescendantOf(workspace)
                 
                 if v:IsDescendantOf(workspace) then
-                    local h = Instance.new("Message",workspace)
-                    h.Text = v.Name:gsub("Moving",""):lower().." is coming go hide"
-                    task.wait(5)
-                    h:Destroy() 
+                    message(v.Name:gsub("Moving",""):lower().." is coming go hide")
                 end
             end
         end) 
@@ -750,7 +767,6 @@ window_misc.toggle("delete puzzle door",false,function(val)
     end
 end)
 
-local entityinfo = game.ReplicatedStorage:WaitForChild("EntityInfo")
 local screechremote = entityinfo:WaitForChild("Screech")
 
 window_misc.toggle("harmless screech",false,function(val)
@@ -815,19 +831,10 @@ window_misc.toggle("auto library code",false,function(val)
                 
                 local code = table.concat(deciphercode())
                 
-                local msg
                 if code:find("_") then
-                    msg = Instance.new("Hint",workspace)
-                    msg.Text = "get all books first"
-                    task.wait(3)
+                    message("get all hints first")
                 else
-                    msg = Instance.new("Message",Workspace)
-                    msg.Text = "the code is: ".. code
-                    task.wait(6)
-                end
-                
-                if msg then
-                    msg:Destroy() 
+                    message("the code is ".. code)
                 end
             end
         end)
@@ -962,6 +969,19 @@ window_misc.toggle("loot aura",false,function(val)
     end
 end)
 
+window_misc.label("bypass anticheat makes it so you cant pick up keys so only do this in multiplayer or in the rooms area",32)
+
+window_misc.button("bypass anticheat",function()
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local newhum = hum:Clone()
+    newhum.Name = "humlol"
+    newhum.Parent = char
+    task.wait()
+    hum.Parent = nil
+    
+    walkspeedslider.setmax(100)
+end)
+
 if game.ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Floor").Value == "Rooms" then
     local window_rooms = library.window("the rooms")
     
@@ -972,19 +992,65 @@ if game.ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Floor").Value =
         
         if val  then
             local jumpscare = plr.PlayerGui:WaitForChild("MainUI"):WaitForChild("Jumpscare"):FindFirstChild("Jumpscare_A90")
-            local face = jumpscare:WaitForChild("Face")
            
             if jumpscare then
-                Jumpscare.Visible = false
-            
+                jumpscare.Parent = nil
+                
                 a90remote.Parent = nil
                 repeat task.wait()
-                    if face.Visible then
-                        game.SoundService.Main.Volume = 1 
-                    end
+                    game.SoundService.Main.Volume = 1 
                 until not flags.noa90
+                jumpscare.Parent = plr.PlayerGui.MainUI.Jumpscare
                 a90remote.Parent = entityinfo 
             end
+        end
+    end)
+    
+    window_rooms.toggle("auto a-1000",false,function(val)
+        flags.autorooms = val
+        
+        if val then
+            local hide = false
+
+            local function getrecentroom(index)
+                local rooms = workspace.CurrentRooms:GetChildren() 
+                table.sort(rooms,function(a,b)
+                    return tonumber(a.Name) > tonumber(b.Name) 
+                end)
+                
+                return rooms[index]
+            end
+            
+            local entconnect
+            entconnect = workspace.ChildAdded:Connect(function(v)
+                if v:IsA("Model") then
+                    if v.Name == "A60" or v.Name == "A120" then
+                        hide = true
+                        
+                        repeat task.wait() until not v:IsDescendantOf(workspace)
+                        hide = false
+                    end
+                end
+            end)
+            
+            while flags.autorooms do
+                local room = getrecentroom(2)
+                local door = room:WaitForChild("Door")
+                local dpos = door:GetPivot()
+                
+                if hide then
+                    repeat task.wait()
+                        char:PivotTo(dpos+Vector3.new(0,150,0))
+                    until not hide
+                else
+                    repeat task.wait()
+                        char:PivotTo(dpos)
+                    until lastroom ~= room or not flags.autorooms
+                end
+                
+                task.wait()
+            end
+            entconnect:Disconnect()
         end
     end)
 end
@@ -995,4 +1061,3 @@ window_misc.button("close gui",function()
     task.wait()
     library.delete()
 end)
-
