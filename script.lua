@@ -970,13 +970,13 @@ end)
 window_misc.label("bypass anticheat makes it so you CANT pick up ANYTHING so only do this in multiplayer or in the rooms area",32)
 
 window_misc.button("bypass anticheat",function()
-    local hum = char:FindFirstChildOfClass("Humanoid")
     local newhum = hum:Clone()
     newhum.Name = "humlol"
     newhum.Parent = char
     task.wait()
     hum.Parent = nil
     
+    hum = newhum
     walkspeedslider.setmax(100)
 end)
 
