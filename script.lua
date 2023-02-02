@@ -352,28 +352,17 @@ window_esp.toggle("book/breaker esp",false,function(val)
     
     if val then
         local function check(v)
-            if v:IsA("Model") then
+            if v:IsA("Model") and (v.Name == "LiveHintBook" or v.Name == "LiveBreakerPolePickup") then
                 task.wait(0.1)
                 
-                if v.Name == "LiveHintBook" then
-                    local h = esp(v,Color3.fromRGB(160,190,255),v.PrimaryPart,"Book")
-                    table.insert(esptable.books,h)
-                    
-                    v.AncestryChanged:Connect(function()
-                        if not v:IsDescendantOf(room) then
-                            h.delete() 
-                        end
-                    end) 
-                elseif v.Name == "LiveBreakerPolePickup" then
-                    local h = esp(v,Color3.fromRGB(160,190,255),v.PrimaryPart,"Breaker")
-                    table.insert(esptable.books,h)
-                    
-                    v.AncestryChanged:Connect(function()
-                        if not v:IsDescendantOf(room) then
-                            h.delete() 
-                        end
-                    end)
-                end
+                local h = esp(v,Color3.fromRGB(160,190,255),v.PrimaryPart,"Book")
+                table.insert(esptable.books,h)
+                
+                v.AncestryChanged:Connect(function()
+                    if not v:IsDescendantOf(room) then
+                        h.delete() 
+                    end
+                end)
             end
         end
         
@@ -409,7 +398,7 @@ end)
 
 local entitynames = {"RushMoving","AmbushMoving","Snare","A60","A120"}
 
-window_player.label("credits: zoophiliaphobic#6287")
+window_player.label("credits: zoophiliaphobic#6287\noh my dayyzz",20)
 window_esp.toggle("entity esp",false,function(val)
     flags.esprush = val
     
@@ -774,17 +763,19 @@ window_misc.toggle("delete puzzle door",false,function(val)
     end
 end)
 
-local screechremote = entityinfo:WaitForChild("Screech")
+local screechremote = entityinfo:FindFirstChild("Screech")
 
-window_misc.toggle("harmless screech",false,function(val)
-    flags.noscreech = val
-    
-    if val then
-        screechremote.Parent = nil
-        repeat task.wait() until not flags.noscreech
-        screechremote.Parent = entityinfo
-    end
-end)
+if screechremote then
+    window_misc.toggle("harmless screech",false,function(val)
+        flags.noscreech = val
+        
+        if val then
+            screechremote.Parent = nil
+            repeat task.wait() until not flags.noscreech
+            screechremote.Parent = entityinfo
+        end
+    end)
+end
 
 window_misc.toggle("no skeleton doors",false,function(val)
     flags.noskeledoors = val
@@ -976,7 +967,7 @@ window_misc.toggle("loot aura",false,function(val)
     end
 end)
 
-window_misc.label("bypass anticheat makes it so you CANT pick up ANYTHING so only do this in multiplayer or in the rooms area",36)
+window_misc.label("bypass anticheat makes it so you CANT pick up ANYTHING so only do this in multiplayer or in the rooms area",32)
 
 window_misc.button("bypass anticheat",function()
     local hum = char:FindFirstChildOfClass("Humanoid")
